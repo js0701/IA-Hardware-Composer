@@ -32,6 +32,8 @@ class NativeSync {
 
   int CreateNextTimelineFence();
 
+  int SignalTimeline();
+
   bool Wait(int fence);
 
  private:

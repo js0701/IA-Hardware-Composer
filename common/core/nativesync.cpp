@@ -62,6 +62,11 @@ bool NativeSync::Init() {
   return true;
 }
 
+int NativeSync::SignalTimeline()
+{
+	return 0;
+}
+
 int NativeSync::CreateNextTimelineFence() {
   ++timeline_;
   return sw_sync_fence_create(timeline_fd_.get(), "NativeSync", timeline_);
