@@ -64,20 +64,44 @@ bool GbmBufferHandler::Init() {
 
 bool GbmBufferHandler::CreateBuffer(uint32_t w, uint32_t h, int format,
                                     HWCNativeHandle *handle,
-                                    bool cursor_usage) {
+                                    bool cursor_usage, uint32_t num_modificators, uint64_t *modificators) {
   uint32_t gbm_format = format;
   if (gbm_format == 0)
     gbm_format = GBM_FORMAT_XRGB8888;
+  
+  uint32_t flags = 0;
+  if(num_modificators > 0) {
+    for(uint32_t i = 0; i < num_modificators; i ++) {
+	  if(modificators[i] == DRM_FORMAT_MOD_LINEAR) flags |= GBM_BO_USE_LINEAR;
+	  if(modificators[i] == I915_FORMAT_MOD_X_TILED) flags |= GBM_BO_USE_X_TILED;
+	  if(modificators[i] == I915_FORMAT_MOD_Y_TILED) flags |= GBM_BO_USE_Y_TILED;
+    }
+  }	
 
-  struct gbm_bo *bo = gbm_bo_create(device_, w, h, gbm_format,
-                                    GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+  flags |= (GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+  struct gbm_bo *bo = gbm_bo_create(device_, w, h, gbm_format, flags);
 
   if (!bo) {
-    bo = gbm_bo_create(device_, w, h, gbm_format, GBM_BO_USE_RENDERING);
-    if (!bo) {
-      ETRACE("GbmBufferHandler: failed to create gbm_bo");
-      return false;
-    }
+  	flags &= ~GBM_BO_USE_SCANOUT;
+    bo = gbm_bo_create(device_, w, h, gbm_format, flags);
+  }
+
+  if(!bo) {
+  	flags &= ~GBM_BO_USE_RENDERING;
+	//the usage here is for CAMERA write or Texture
+	flags |= GBM_BO_USE_CAMERA_WRITE;
+    bo = gbm_bo_create(device_, w, h, gbm_format, flags);
+  }
+
+  if(!bo) {
+  	flags &=  ~GBM_BO_USE_CAMERA_WRITE;
+	flags |= GBM_BO_USE_CAMERA_WRITE;
+    bo = gbm_bo_create(device_, w, h, gbm_format, flags);
+  }
+
+  if (!bo) {
+    ETRACE("GbmBufferHandler: failed to create gbm_bo");
+    return false;
   }
 
   struct gbm_handle *temp = new struct gbm_handle();

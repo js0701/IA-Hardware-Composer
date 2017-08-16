@@ -33,7 +33,8 @@ class GbmBufferHandler : public NativeBufferHandler {
   bool Init();
 
   bool CreateBuffer(uint32_t w, uint32_t h, int format, HWCNativeHandle *handle,
-                    bool cursor_usage = false) override;
+                    bool cursor_usage = false, 
+                    uint32_t num_modificators = 0, uint64_t *modificators = NULL) override;
   bool ReleaseBuffer(HWCNativeHandle handle) override;
   void DestroyHandle(HWCNativeHandle handle) override;
   void CopyHandle(HWCNativeHandle source, HWCNativeHandle *target) override;

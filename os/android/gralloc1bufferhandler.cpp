@@ -82,7 +82,7 @@ bool Gralloc1BufferHandler::Init() {
 
 bool Gralloc1BufferHandler::CreateBuffer(uint32_t w, uint32_t h, int format,
                                          HWCNativeHandle *handle,
-                                         bool cursor_usage) {
+                                         bool cursor_usage, uint32_t num_modificators, uint64_t *modificators) {
   return CreateGraphicsBuffer(w, h, format, handle, cursor_usage);
 }
 

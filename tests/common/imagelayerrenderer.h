@@ -26,6 +26,7 @@ class ImageLayerRenderer : public LayerRenderer {
   ~ImageLayerRenderer();
 
   bool Init(uint32_t width, uint32_t height, uint32_t format,
+  	        uint32_t usage_format = -1, uint32_t num_modificators = 0, uint64_t* modificators = NULL,
             glContext* gl = NULL, const char* resoruce_path = NULL) override;
   void Draw(int64_t* pfence) override;
 

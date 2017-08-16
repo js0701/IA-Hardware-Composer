@@ -68,10 +68,12 @@ bool GLLayerRenderer::Init_GL(glContext* gl) {
 }
 
 bool GLLayerRenderer::Init(uint32_t width, uint32_t height, uint32_t format,
+                           uint32_t usage_format, uint32_t num_modificators, uint64_t* modificators,
                            glContext* gl, const char* resource_path) {
   if (format != DRM_FORMAT_XRGB8888)
     return false;
-  if (!LayerRenderer::Init(width, height, format, gl))
+  if (!LayerRenderer::Init(width, height, format, 
+  	                       usage_format, num_modificators, modificators, gl))
     return false;
 
   if (!Init_GL(gl)) {
