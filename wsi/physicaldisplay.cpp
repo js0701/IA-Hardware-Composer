@@ -28,6 +28,7 @@
 
 #include "displayqueue.h"
 #include "displayplanemanager.h"
+#include "drmdisplaymanager.h"
 #include "hwcutils.h"
 #include "wsi_utils.h"
 
@@ -58,7 +59,7 @@ void PhysicalDisplay::MarkForDisconnect() {
   IHOTPLUGEVENTTRACE("PhysicalDisplay::MarkForDisconnect recieved.");
   display_state_ |= kDisconnectionInProgress;
   display_state_ |= kRefreshClonedDisplays;
-  if (pipe_ == 0 && !(display_state_ & kInitialized))
+  if (!(display_state_ & kInitialized))
     display_state_ |= kHandlePendingHotPlugNotifications;
 
   display_state_ &= ~kNotifyClient;
@@ -68,12 +69,15 @@ void PhysicalDisplay::MarkForDisconnect() {
 void PhysicalDisplay::NotifyClientOfConnectedState() {
   SPIN_LOCK(modeset_lock_);
 
+  if(!hotplug_callback_)
+  	ETRACE("not hotplug callback for %p yet", this);
   if (hotplug_callback_ && (display_state_ & kConnected) &&
       (display_state_ & kNotifyClient)) {
     IHOTPLUGEVENTTRACE(
         "PhysicalDisplay Sent Hotplug even call back with connected value set "
         "to true. %p hotplugdisplayid: %d \n",
         this, hot_plug_display_id_);
+	ETRACE("Hot plugin callback called for %p, displaystate:%x id %d", this, display_state_, hot_plug_display_id_);
     hotplug_callback_->Callback(hot_plug_display_id_, true);
     display_state_ &= ~kNotifyClient;
   }
@@ -115,6 +119,7 @@ void PhysicalDisplay::DisConnect() {
 
 void PhysicalDisplay::Connect() {
   SPIN_LOCK(modeset_lock_);
+  ETRACE("Connect called for %p", this);
 
   display_state_ &= ~kDisconnectionInProgress;
   IHOTPLUGEVENTTRACE("PhysicalDisplay::Connect recieved. %p \n", this);
@@ -159,6 +164,7 @@ int PhysicalDisplay::GetDisplayPipe() {
 
 bool PhysicalDisplay::SetActiveConfig(uint32_t config) {
   // update the activeConfig
+  ETRACE("SetActiveConfig called for %p\n", this);
   IHOTPLUGEVENTTRACE(
       "SetActiveConfig: New config to be used %d pipe: %p display: %p", config,
       pipe_, this);
@@ -170,8 +176,12 @@ bool PhysicalDisplay::SetActiveConfig(uint32_t config) {
 }
 
 bool PhysicalDisplay::GetActiveConfig(uint32_t *config) {
+  ETRACE("GetActiveConfig for display %p called\n");
   if (!config)
+  {
+    ETRACE("GetActiveConfig for display %p failed\n");
     return false;
+  }
   IHOTPLUGEVENTTRACE(
       "GetActiveConfig: Current config being used Config: %d pipe: %d display: "
       "%p",
@@ -210,6 +220,7 @@ bool PhysicalDisplay::SetPowerMode(uint32_t power_mode) {
 
 bool PhysicalDisplay::UpdatePowerMode() {
   display_state_ &= ~kPendingPowerMode;
+  ETRACE("Update PowerMOde %p powermode %d", this, power_mode_);
 
   if (power_mode_ == kOn) {
     display_state_ |= kNeedsModeset;
@@ -328,16 +339,25 @@ void PhysicalDisplay::RegisterHotPlugCallback(
   hot_plug_display_id_ = display_id;
   hotplug_callback_ = callback;
   bool connected = display_state_ & kConnected;
-  display_state_ &= ~kNotifyClient;
   SPIN_UNLOCK(modeset_lock_);
 
   if (hotplug_callback_ && pipe_ == 0) {
+  	display_state_ &= ~kNotifyClient;
     if (connected) {
+	  ETRACE("Hot plugin callback! this %p displaystate:%x hot_plug_display_id:%d", this, display_state_, hot_plug_display_id_);
       hotplug_callback_->Callback(hot_plug_display_id_, true);
+	  
+	  //if(gManager)
+	  //	gManager->UpdateDisplayState();
+	  //if(pipe_ != 0)
+	  	//hotplug_callback_->Callback(hot_plug_display_id_, true);
     } else {
+	  ETRACE("Hot plug unplug callback this %p", this);
       hotplug_callback_->Callback(hot_plug_display_id_, false);
     }
   }
+  else 
+  	ETRACE("Not callback when registerHotPlugCallback for %p", this);
 }
 
 void PhysicalDisplay::VSyncControl(bool enabled) {

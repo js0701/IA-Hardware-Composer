@@ -40,6 +40,8 @@ namespace hwcomposer {
 
 class NativeDisplay;
 
+//extern DrmDisplayManager* gManager;
+
 class DrmDisplayManager : public HWCThread, public DisplayManager {
  public:
   DrmDisplayManager();
@@ -60,13 +62,14 @@ class DrmDisplayManager : public HWCThread, public DisplayManager {
 
   void NotifyClientsOfDisplayChangeStatus();
 
+  bool UpdateDisplayState();
+
  protected:
   void HandleWait() override;
   void HandleRoutine() override;
 
  private:
   void HotPlugEventHandler();
-  bool UpdateDisplayState();
   std::unique_ptr<NativeDisplay> headless_;
   std::unique_ptr<NativeDisplay> virtual_display_;
   std::vector<std::unique_ptr<DrmDisplay>> displays_;

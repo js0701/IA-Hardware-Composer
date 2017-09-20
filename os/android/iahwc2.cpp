@@ -354,6 +354,7 @@ HWC2::Error IAHWC2::HwcDisplay::DestroyLayer(hwc2_layer_t layer) {
 
 HWC2::Error IAHWC2::HwcDisplay::GetActiveConfig(hwc2_config_t *config) {
   supported(__func__);
+  ETRACE("GetActiveConfig called in IAHW2 %p", display_);
   if (!display_->GetActiveConfig(config))
     return HWC2::Error::BadConfig;
 
@@ -659,6 +660,7 @@ HWC2::Error IAHWC2::HwcDisplay::SetOutputBuffer(buffer_handle_t buffer,
 HWC2::Error IAHWC2::HwcDisplay::SetPowerMode(int32_t mode_in) {
   supported(__func__);
   uint32_t power_mode = 0;
+  ETRACE("SetPowerMode called for %p, with mode:%d", display_, mode_in);
   auto mode = static_cast<HWC2::PowerMode>(mode_in);
   switch (mode) {
     case HWC2::PowerMode::Off:

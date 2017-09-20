@@ -34,6 +34,7 @@ struct HwcBuffer {
   uint32_t gem_handles[4];
   uint32_t prime_fd = 0;
   uint32_t usage = 0;
+  uint32_t numplanes = 0;
 };
 
 #endif  // PUBLIC_HWCBUFFER_H_

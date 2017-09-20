@@ -203,7 +203,18 @@ void DrmBuffer::SetRecommendedFormat(uint32_t format) {
 
 bool DrmBuffer::CreateFrameBuffer(uint32_t gpu_fd) {
   ReleaseFrameBuffer();
-  int ret = drmModeAddFB2(gpu_fd, width_, height_, frame_buffer_format_,
+  int ret = 0;
+  
+  if(frame_buffer_format_ == DRM_FORMAT_XRGB8888) {
+  	uint64_t modifiers[4];
+	modifiers[0] = I915_FORMAT_MOD_Y_TILED_CCS;
+    modifiers[1] = modifiers[2] = modifiers[3] = DRM_FORMAT_MOD_NONE; 
+  	ret = drmModeAddFB2WithModifiers(gpu_fd, width_, height_, frame_buffer_format_,
+		gem_handles_, pitches_, offsets_, modifiers, &fb_id_, DRM_MODE_FB_MODIFIERS);
+  }
+  
+  	
+  else ret = drmModeAddFB2(gpu_fd, width_, height_, frame_buffer_format_,
                           gem_handles_, pitches_, offsets_, &fb_id_, 0);
 
   if (ret) {

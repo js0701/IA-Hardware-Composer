@@ -37,6 +37,9 @@
 
 namespace hwcomposer {
 
+//DrmDisplayManager* gManager = NULL;
+
+
 DrmDisplayManager::DrmDisplayManager() : HWCThread(-8, "DisplayManager") {
   CTRACE();
 }
@@ -57,6 +60,7 @@ bool DrmDisplayManager::Initialize() {
     ETRACE("Failed to open dri %s", PRINTERROR());
     return -ENODEV;
   }
+  //gManager = this;
 
   struct drm_set_client_cap cap = {DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1};
   drmIoctl(fd_, DRM_IOCTL_SET_CLIENT_CAP, &cap);
@@ -250,6 +254,7 @@ bool DrmDisplayManager::UpdateDisplayState() {
                                       preferred_mode)) {
             IHOTPLUGEVENTTRACE("Connected %d with crtc: %d \n",
                                encoder->crtc_id, display->CrtcId());
+			ETRACE("Connected %d with crtc: %d \n", encoder->crtc_id, display->CrtcId());
             // Set the modes supported for each display
             display->SetDrmModeInfo(mode);
             break;
@@ -294,6 +299,7 @@ bool DrmDisplayManager::UpdateDisplayState() {
   }
 
   if (callback_) {
+  	ETRACE("drm Discplay manager calling back!\n");
     callback_->Callback(connected_displays_);
   }
 
