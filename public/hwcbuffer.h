@@ -35,6 +35,7 @@ struct HwcBuffer {
   uint32_t prime_fd = 0;
   uint32_t usage = 0;
   uint32_t numplanes = 0;
+  uint64_t modifier = 0;
 };
 
 #endif  // PUBLIC_HWCBUFFER_H_

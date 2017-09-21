@@ -87,6 +87,7 @@ class DrmBuffer : public OverlayBuffer {
   uint32_t usage_ = 0;
   uint32_t gpu_fd_ = 0;
   uint32_t total_planes_ = 0;
+  uint64_t modifier_ = 0;
   bool is_yuv_ = false;
   HWCNativeHandle handle_ = 0;
   NativeBufferHandler* buffer_handler_ = 0;

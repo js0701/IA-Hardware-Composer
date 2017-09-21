@@ -54,6 +54,7 @@ void DrmBuffer::Initialize(const HwcBuffer& bo) {
 
   prime_fd_ = bo.prime_fd;
   usage_ = bo.usage;
+  modifier_ = bo.modifier;
   if (usage_ & hwcomposer::kLayerCursor) {
     // We support DRM_FORMAT_ARGB8888 for cursor.
     frame_buffer_format_ = DRM_FORMAT_ARGB8888;
@@ -61,10 +62,12 @@ void DrmBuffer::Initialize(const HwcBuffer& bo) {
     frame_buffer_format_ = format_;
   }
 
+  total_planes_ = bo.numplanes;
+
   switch (format_) {
     case DRM_FORMAT_NV12:
     case DRM_FORMAT_NV16:
-      total_planes_ = 2;
+      //total_planes_ = 2;
       is_yuv_ = true;
       break;
     case DRM_FORMAT_YVU420:
@@ -72,7 +75,7 @@ void DrmBuffer::Initialize(const HwcBuffer& bo) {
     case DRM_FORMAT_YUV422:
     case DRM_FORMAT_YUV444:
       is_yuv_ = true;
-      total_planes_ = 3;
+      //total_planes_ = 3;
       break;
     case DRM_FORMAT_UYVY:
     case DRM_FORMAT_YUYV:
@@ -80,11 +83,11 @@ void DrmBuffer::Initialize(const HwcBuffer& bo) {
     case DRM_FORMAT_VYUY:
     case DRM_FORMAT_AYUV:
       is_yuv_ = true;
-      total_planes_ = 1;
+      //total_planes_ = 1;
       break;
     default:
       is_yuv_ = false;
-      total_planes_ = 1;
+      //total_planes_ = 1;
   }
 }
 
@@ -205,10 +208,10 @@ bool DrmBuffer::CreateFrameBuffer(uint32_t gpu_fd) {
   ReleaseFrameBuffer();
   int ret = 0;
   
-  if(frame_buffer_format_ == DRM_FORMAT_XRGB8888) {
+  if(modifier_) {
   	uint64_t modifiers[4];
-	modifiers[0] = I915_FORMAT_MOD_Y_TILED_CCS;
-    modifiers[1] = modifiers[2] = modifiers[3] = DRM_FORMAT_MOD_NONE; 
+	modifiers[1] = modifiers[0] = modifier_;
+    modifiers[2] = modifiers[3] = DRM_FORMAT_MOD_NONE; 
   	ret = drmModeAddFB2WithModifiers(gpu_fd, width_, height_, frame_buffer_format_,
 		gem_handles_, pitches_, offsets_, modifiers, &fb_id_, DRM_MODE_FB_MODIFIERS);
   }
