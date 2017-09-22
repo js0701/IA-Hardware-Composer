@@ -311,7 +311,7 @@ bool GbmBufferHandler::ImportBuffer(HWCNativeHandle handle, HwcBuffer *bo) {
   bo->numplanes = total_planes;
   for(size_t i= 0; i < total_planes; i++ ) {
     bo->gem_handles[i] = gbm_bo_get_handle_for_plane(handle->imported_bo, i).u32;
-    bo->offsets[i] = gbm_bo_get_offset(handle->imported_bo, i);
+    bo->offsets[i] = handle->import_data.fd_modifier_data.offsets[i];
     bo->pitches[i] = gbm_bo_get_stride_for_plane(handle->bo, i);
   }
   
