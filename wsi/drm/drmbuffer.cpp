@@ -144,7 +144,31 @@ GpuImage DrmBuffer::ImportImage(GpuDisplay egl_display) {
           egl_display, EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT,
           static_cast<EGLClientBuffer>(nullptr), attr_list_yv12);
     }
-  } else {
+  }
+  else if(modifier_ && total_planes_ ==2)
+  {
+      uint64_t modifier = modifier_;
+	  EGLint modifier_low = (EGLint) modifier;
+	  EGLint modifier_high = (EGLint) (modifier>>32);
+	  const EGLint image_attrs[] = {
+        EGL_WIDTH,                     (EGLint)width_,
+        EGL_HEIGHT,                    (EGLint)height_,
+        EGL_LINUX_DRM_FOURCC_EXT,      format_,
+        EGL_DMA_BUF_PLANE0_FD_EXT,     (EGLint)prime_fd_,
+        EGL_DMA_BUF_PLANE0_PITCH_EXT,  (EGLint)pitches_[0],
+        EGL_DMA_BUF_PLANE0_OFFSET_EXT, (EGLint)offsets_[0],
+        EGL_DMA_BUF_PLANE0_MODIFIER_LO_EXT, modifier_low,
+        EGL_DMA_BUF_PLANE0_MODIFIER_HI_EXT, modifier_high,
+        EGL_DMA_BUF_PLANE1_FD_EXT,     (EGLint)prime_fd_,
+        EGL_DMA_BUF_PLANE1_PITCH_EXT,  (EGLint)pitches_[1],
+        EGL_DMA_BUF_PLANE1_OFFSET_EXT, (EGLint)offsets_[1],
+        EGL_DMA_BUF_PLANE1_MODIFIER_LO_EXT, modifier_low,
+        EGL_DMA_BUF_PLANE1_MODIFIER_HI_EXT, modifier_high,
+        EGL_NONE,
+	};
+
+  }
+	else {
     const EGLint attr_list[] = {
         EGL_WIDTH,                     static_cast<EGLint>(width_),
         EGL_HEIGHT,                    static_cast<EGLint>(height_),
